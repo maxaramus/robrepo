@@ -9,9 +9,19 @@ public class Utils
 	private static float tileHeight;
 	private static Texture bgTexture = null;
 	private static Point boardTopLeft;
+	private static float boardWidth;
+	private static float boardHeight;
 	
 	public static Point getTopLeft() {
 		return boardTopLeft;
+	}
+	
+	public static float getBoardHeight(){
+		return boardHeight;
+	}
+	
+	public static float getBoardWidth(){
+		return boardWidth;
 	}
 	
 	public static float getTileWidth(){
@@ -23,14 +33,17 @@ public class Utils
 	}
 	
 	public static void recalcSizes() {
-		float xPct = (float)Gdx.graphics.getWidth() / (float)bgTexture.getWidth();
-		float yPct = (float)Gdx.graphics.getHeight()/ (float)bgTexture.getHeight();
+		boardWidth = (float)Gdx.graphics.getWidth() * 0.665f;
+		boardHeight=(float)Gdx.graphics.getHeight() * 0.774f;
 		
-		tileWidth = Colors.BLUE.getTexture().getWidth() * xPct;
-		tileHeight = Colors.BLUE.getTexture().getHeight() * yPct;
+		//tileWidth = boardWidth / 10;
+		//tileHeight = boardHeight / 21;
 		
-		boardTopLeft.X = (int)(Gdx.graphics.getWidth() * 0.05);
-		boardTopLeft.Y = (int)(Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.05);
+		boardTopLeft = new Point(
+			(int)(Gdx.graphics.getWidth() * 0.02),
+			(int)(Gdx.graphics.getHeight() * 0.99));
+			
+		
 	}
 	
 	public static Texture getBgTexture(){

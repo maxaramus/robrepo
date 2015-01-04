@@ -18,8 +18,8 @@ public class Tile
 	public void draw(SpriteBatch batch){
 		if(color.getSprite() != null){
 			Sprite tileSprite = color.getSprite();
-			tileSprite.setSize(Utils.getTileWidth(),Utils.getTileHeight());
-			tileSprite.setPosition(topLeft.X, topLeft.Y);
+			//tileSprite.setSize(Utils.getTileWidth(),Utils.getTileHeight());
+			tileSprite.setPosition(topLeft.X, topLeft.Y - color.getSprite().getHeight());
 			tileSprite.draw(batch);
 		}
 	}
