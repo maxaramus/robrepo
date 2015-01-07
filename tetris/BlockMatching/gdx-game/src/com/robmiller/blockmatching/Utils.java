@@ -5,6 +5,16 @@ import com.badlogic.gdx.graphics.g2d.*;
 
 public class Utils
 {
+	public static enum Shapes{
+		IBLOCK,
+		LBLOCK,
+		JBLOCK,
+		TBLOCK,
+		SBLOCK,
+		QBLOCK,
+		ZBLOCK
+	}
+	
 	private static float tileWidth;
 	private static float tileHeight;
 	private static Texture bgTexture = null;
@@ -46,15 +56,31 @@ public class Utils
 		
 	}
 	
+	public static void drawText(String s, Point p){
+		SpriteBatch b = new SpriteBatch();
+		BitmapFont font = new BitmapFont(); 
+		font.setColor(Color.RED);
+		
+		b.begin();
+		font.draw(b,s,p.X,p.Y);
+		b.end();
+	}
+	
+	public static void drawText(SpriteBatch b, String s, Point p){
+		BitmapFont font = new BitmapFont(); 
+		font.setColor(Color.RED);
+		font.draw(b,s,p.X,p.Y);
+	}
+	
 	public static Texture getBgTexture(){
 		if(bgTexture == null)
-			bgTexture = new Texture(Gdx.files.internal("uiframe.png"));
+			bgTexture = new Texture(Gdx.files.internal("bmbackground.png"));
 			
 		return bgTexture;
 	}
 	
 	public static enum Colors{
-		NULL(""),
+		NULL("blocknull.png"),
 		ORANGE("blockorange.png"),
 		RED("blockred.png"),
 		GREEN("blockgreen.png"),

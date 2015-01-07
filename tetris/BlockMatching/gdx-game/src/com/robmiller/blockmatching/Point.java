@@ -9,4 +9,9 @@ public class Point
 		X = x;
 		Y = y;
 	}
+	
+	public Point add(Point rh){
+		Point ret = new Point(X+rh.X,Y+rh.Y);
+		return ret;
+	}
 }

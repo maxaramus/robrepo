@@ -9,11 +9,45 @@ public class Piece
 	protected HashMap<Integer,Point[]> offsets = null;
 	protected Utils.Colors color = null;
 	protected Board gameBoard;
-	
+	public boolean isLocked = false;
 	public Piece(Board gb, Point loc, Utils.Colors col) {
 		location = loc;
 		gameBoard = gb;
 		color = col;
+	}
+	
+	public void pushDown(){
+		clearPiece();
+		Point newLoc = new Point(location.X,location.Y + 1);
+		isLocked = !validMove(newLoc);
+		
+		if(!isLocked){
+			location = newLoc;
+		}
+		
+		placePiece(location);
+	}
+	
+	public void pushLeft(){
+		clearPiece();
+		Point newLoc = new Point(location.X-1,location.Y);
+
+		if(validMove(newLoc)){
+			location = newLoc;
+		}
+
+		placePiece(location);
+	}
+	
+	public void pushRight(){
+		clearPiece();
+		Point newLoc = new Point(location.X+1,location.Y);
+
+		if(validMove(newLoc)){
+			location = newLoc;
+		}
+
+		placePiece(location);
 	}
 	
 	public int getRotation() {
@@ -22,21 +56,34 @@ public class Piece
 	
 	public void rotate() {
 		clearPiece();
+		int initialRot = rotation;
 		
 		if (rotation == 3)
 			rotation = 0;
 		else
 			rotation++;
 		
+		if (!validMove(location)) {
+			Point tryNew = new Point(location.X-1,location.Y);
+			if (validMove(tryNew))
+				location = tryNew;
+			else {
+				tryNew = new Point(location.X+1,location.Y);
+				if(validMove(tryNew))
+					location = tryNew;
+				else
+					rotation = initialRot;
+			}
+		}
+			
 		placePiece(location);
-		validateLocation();
 	}
 	
 	public void placePiece(Point xy){
 		Point[] tiles = offsets.get(getRotation());
 
 		location = xy;
-
+		validLocation();
 		gameBoard.setTileColor(xy, color);
 
 		for (Point p : tiles){
@@ -45,23 +92,49 @@ public class Piece
 		}
 	}
 	
-	protected void validateLocation(){
+	public boolean validMove(Point newP){
 		Point[] tiles = offsets.get(getRotation());
+		boolean valid = true;
+
+		if (gameBoard.isOccupied(newP))
+			valid = false;
+			
+		for (Point p : tiles){
+			if (gameBoard.isOccupied(p.add(newP)))
+				valid = false;
+		}
+		
+		return valid;
+	}
+	
+	protected boolean validLocation(){
+		Point[] tiles = offsets.get(getRotation());
+		boolean valid = true;
 		
 		for (Point p : tiles){
-			if (location.X + p.X < 0)
+			if (location.X + p.X < 0){
 				location.X++;
-			else if(location.X + p.X >= Board.BOARD_COLS)
+				valid = false;
+			}
+			else if(location.X + p.X >= Board.BOARD_COLS){
 				location.X--;
-				
-			if (location.Y + p.Y < 0)
+				valid = false;
+			}	
+			if (location.Y + p.Y < 0){
 				location.Y++;
-			else if (location.Y + p.Y >= Board.BOARD_ROWS)
+				valid = false;
+			}
+			else if (location.Y + p.Y >= Board.BOARD_ROWS){
 				location.Y--;
+				valid = false;
+			}
 		}
+		return valid;
 	}
 	
 	protected void clearPiece(){
+		if (isLocked) return;
+		
 		Point[] tiles = offsets.get(getRotation());
 
 		gameBoard.setTileColor(location, Utils.Colors.NULL);
