@@ -2,28 +2,110 @@ package com.robmiller.blockmatching;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import android.util.*;
 
 public class Utils
 {
-	public static enum Shapes{
-		IBLOCK,
-		LBLOCK,
-		JBLOCK,
-		TBLOCK,
-		SBLOCK,
-		QBLOCK,
-		ZBLOCK
+	public static enum Buttons{
+		HOLD("HOLD");
+		
+		private String str;
+		
+		private Buttons(String s) {
+			str = s;	
+		}
+		
+		public String getString() {
+			return str;
+		}
 	}
 	
-	private static float tileWidth;
-	private static float tileHeight;
-	private static Texture bgTexture = null;
-	private static Point boardTopLeft;
+	public static enum Colors{
+		NULL("blocknull.png"),
+		ORANGE("blockorange.png"),
+		RED("blockred.png"),
+		GREEN("blockgreen.png"),
+		BLUE("blockblue.png"),
+		TEAL("blockteal.png"),
+		PURPLE("blockpurple.png"),
+		YELLOW("blockyellow.png");
+
+		private String textureHandle;
+		private Texture texture;
+		private Sprite sprite;
+
+		private Colors(String tex){
+			textureHandle = tex;
+			texture = new Texture(Gdx.files.internal(textureHandle));
+			sprite = new Sprite(texture);
+		}
+
+		public String getTextureHandle(){
+			return textureHandle;
+		}
+
+		public Texture getTexture(){
+			return texture;
+		}
+
+		public Sprite getSprite(){
+			return sprite;
+		}
+	}
+	
+	public static enum Shapes{
+		IBLOCK("pieceiblock.png"),
+		LBLOCK("piecelblock.png"),
+		JBLOCK("piecejblock.png"),
+		TBLOCK("piecetblock.png"),
+		SBLOCK("piecesblock.png"),
+		QBLOCK("piecesquare.png"),
+		ZBLOCK("piecezblock.png");
+		
+		private String texHandle;
+		private Texture texture;
+		private Sprite sprite;
+		private Shapes(String str){
+			texHandle = str;
+			texture = new Texture(Gdx.files.internal(texHandle));
+			sprite = new Sprite(texture);
+		}
+		
+		public String getHandle() {
+			return texHandle;
+		}
+		
+		public Texture getTexture() {
+			return texture;
+		}
+		
+		public Sprite getSprite() {
+			return sprite;
+		}
+	}
+	
+	private static float tileSize;
+	private static Point boardBottomLeft;
 	private static float boardWidth;
 	private static float boardHeight;
+	private static float uiPadding;
+	private static Point uiBottomLeft;
+	private static Point uiTopRight;
 	
-	public static Point getTopLeft() {
-		return boardTopLeft;
+	public static BMScreen getScreen() {
+		return (BMScreen)(((Game)Gdx.app.getApplicationListener()).getScreen());
+	}
+	
+	public static Point getUIBottomLeft() {
+		return uiBottomLeft;
+	}
+	
+	public static Point getUITopRight() {
+		return uiTopRight;
+	}
+	
+	public static Point getBoardBottomLeft() {
+		return boardBottomLeft;
 	}
 	
 	public static float getBoardHeight(){
@@ -34,26 +116,36 @@ public class Utils
 		return boardWidth;
 	}
 	
-	public static float getTileWidth(){
-		return tileWidth;
+	public static float getTileSize(){
+		return tileSize;
 	}
 	
-	public static float getTileHeight(){
-		return tileHeight;
+	public static float getUIPadding(){
+		return uiPadding;	
 	}
 	
-	public static void recalcSizes() {
-		boardWidth = (float)Gdx.graphics.getWidth() * 0.665f;
-		boardHeight=(float)Gdx.graphics.getHeight() * 0.774f;
+	public static void recalcSizes(int w, int h) {
+		int largerDim = (w > h)? w : h;
+		int smallerDim = (w < h)? w : h;
 		
-		//tileWidth = boardWidth / 10;
-		//tileHeight = boardHeight / 21;
+		uiPadding = smallerDim * 0.02f;
+		boardWidth = (float)smallerDim * 0.66f - uiPadding * 2;
+		tileSize = boardWidth / 10;
 		
-		boardTopLeft = new Point(
-			(int)(Gdx.graphics.getWidth() * 0.02),
-			(int)(Gdx.graphics.getHeight() * 0.99));
-			
+		int bottomLeftX = (int)uiPadding;
 		
+		if (tileSize * 21 + uiPadding * 2 > largerDim) {
+			tileSize--;
+			boardWidth -= 10;
+		}
+		
+		boardHeight = tileSize * 21;
+		
+		int bottomLeftY = (int)(largerDim - boardHeight - uiPadding);
+		
+		boardBottomLeft = new Point(bottomLeftX,bottomLeftY);
+		uiBottomLeft = new Point((int)(bottomLeftX + uiPadding * 4 + boardWidth), bottomLeftY);
+		uiTopRight = new Point((int)(w - uiPadding), (int)(h - uiPadding));
 	}
 	
 	public static void drawText(String s, Point p){
@@ -72,45 +164,11 @@ public class Utils
 		font.draw(b,s,p.X,p.Y);
 	}
 	
-	public static Texture getBgTexture(){
-		if(bgTexture == null)
-			bgTexture = new Texture(Gdx.files.internal("bmbackground.png"));
-			
-		return bgTexture;
-	}
-	
-	public static enum Colors{
-		NULL("blocknull.png"),
-		ORANGE("blockorange.png"),
-		RED("blockred.png"),
-		GREEN("blockgreen.png"),
-		BLUE("blockblue.png"),
-		TEAL("blockteal.png"),
-		PURPLE("blockpurple.png"),
-		YELLOW("blockyellow.png");
+	public static void dispose(){
+		Colors[] cols = Colors.values();
 		
-		private String textureHandle;
-		private Texture texture;
-		private Sprite sprite;
-		
-		private Colors(String tex){
-			textureHandle = tex;
-			
-			if(textureHandle != ""){
-				texture = new Texture(Gdx.files.internal(textureHandle));
-				sprite = new Sprite(texture);
-			}
+		for(int i = 0; i < cols.length; i++){
+			cols[i].getTexture().dispose();
 		}
-		public String getTextureHandle(){
-			return textureHandle;
-		}
-		
-		public Texture getTexture(){
-			return texture;
-		}
-		
-		public Sprite getSprite(){
-			return sprite;
-		}
-	}
+	}	
 }

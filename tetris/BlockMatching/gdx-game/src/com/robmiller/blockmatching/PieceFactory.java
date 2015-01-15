@@ -1,4 +1,5 @@
 package com.robmiller.blockmatching;
+import java.lang.reflect.*;
 
 public class PieceFactory
 {
@@ -6,6 +7,21 @@ public class PieceFactory
 	
 	public PieceFactory(Board gb){
 		gameBoard = gb;
+	}
+	
+	public Piece getPiece(Class type) {
+		try{
+			return (Piece)(type.getConstructors()[0].newInstance(gameBoard));	
+		}
+		catch(InstantiationException e) {
+			return null;
+		}
+		catch(IllegalAccessException e) {
+			return null;
+		}
+		catch(InvocationTargetException e) {
+			return null;
+		}
 	}
 	
 	public Piece getPiece(int type){

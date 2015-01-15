@@ -3,8 +3,10 @@ import com.badlogic.gdx.graphics.g2d.*;
 import android.util.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.scenes.scene2d.*;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 
-public class Board
+public class Board extends Table
 {
 	public static final int BOARD_ROWS = 21;
 	public static final int BOARD_COLS = 10;
@@ -12,28 +14,34 @@ public class Board
 	private Tile[][] gameTiles = new Tile[BOARD_COLS][BOARD_ROWS];
 	private Point[][] vertices = new Point[BOARD_COLS][BOARD_ROWS];
 	private Piece currentPiece = null;
+	private Class heldPiece = null;
 	private Point origin;
 	private final PieceFactory factory;
-	private Player player;
+	private float updateTime;
+	private float timeSinceLastUpdate = 0;
+	private int swapCount = 0;
 	
-	public Board(Point o, Player p){
+	public Board(Point o){
+		updateTime = 0.5f;
 		origin = o;
 		factory = new PieceFactory(this);
-		player = p;
 		
-		for(int i = 0; i < BOARD_COLS; i++){
-			for(int j = 0; j < BOARD_ROWS; j++){
-				vertices[i][j] = new Point(o.X + i * Utils.Colors.BLUE.getTexture().getWidth(), o.Y - j * Utils.Colors.BLUE.getTexture().getHeight());
-				gameTiles[i][j] = new Tile(this,vertices[i][j],Utils.Colors.NULL);
+		for(int j = 0; j < BOARD_ROWS; j++){
+			for(int i = 0; i < BOARD_COLS; i++){
+				vertices[i][j] = new Point((int)(o.X + i * Utils.getTileSize()), (int)(o.Y + j * Utils.getTileSize()));
+				gameTiles[i][j] = new Tile(vertices[i][j],Utils.Colors.NULL);
 			}
 		}
 	}
 	
-	public void update(){
-		pushDown();
-		
-		//if(currentPiece.isLocked)
-			//checkRows();
+	@Override
+	public void act(float delta) {
+		timeSinceLastUpdate += delta;
+
+		if(timeSinceLastUpdate >= updateTime){
+			pushDown();
+			timeSinceLastUpdate = 0;
+		}
 	}
 	
 	private void checkRows(){
@@ -54,7 +62,7 @@ public class Board
 				cleared++;
 				for (int y = i; y >0; y--){
 					for (int x = 0; x < BOARD_COLS; x++){
-						gameTiles[x][y].changeColor(gameTiles[x][y-1].getColor());
+						gameTiles[x][y].changeColor(gameTiles[x][y-1].getTileColor());
 					}
 				}
 				for (int x = 0; x < BOARD_COLS; x++){
@@ -62,8 +70,6 @@ public class Board
 				}
 			}
 		}
-		
-		player.incrementLinesCleared(cleared);
 	}
 	
 	public boolean isOccupied(Point p){
@@ -77,27 +83,57 @@ public class Board
 		return ret;
 	}
 	
+	public Class holdSwapPiece() {
+		if (swapCount < 1)
+			swapCount++;
+		else
+			return null;
+			
+		if (currentPiece == null) {
+			return null;
+		}
+		
+		if (heldPiece == null) {
+			heldPiece = currentPiece.getClass();
+			currentPiece.clearPiece();
+			placePiece();
+			swapCount = 1;
+		}
+		else {
+			Class temp = heldPiece;
+			heldPiece = currentPiece.getClass();
+			currentPiece.clearPiece();
+			currentPiece = factory.getPiece(temp);
+			currentPiece.placePiece(new Point(5,gameTiles[0].length - 1));
+		}
+		
+		return heldPiece;
+	}
+	
 	private void placePiece(){
 		int newPiece = MathUtils.random(0,6);
 		currentPiece = getPiece(newPiece);
 		
 		if(currentPiece == null) return;
 		 
-		currentPiece.placePiece(new Point(5,0));
+		currentPiece.placePiece(new Point(5,gameTiles[0].length - 1));
+		swapCount = 0;
 	}
 	
 	private Piece getPiece(int i){
 		return factory.getPiece(i);
 	}
 	
-	public Point getScreenCoords(Point xy){
-		return vertices[xy.X][xy.Y];
-	}
+	//public Point getScreenCoords(Point xy){
+	//	return vertices[xy.X][xy.Y];
+	//}
 	
-	public void draw(SpriteBatch batch){
+	@Override
+	public void draw(Batch batch, float alpha){
+		batch.draw(Utils.Colors.NULL.getTexture(),Utils.getBoardBottomLeft().X, Utils.getBoardBottomLeft().Y, Utils.getBoardWidth(), Utils.getBoardHeight());
 		for(int i = 0; i < BOARD_COLS; i++){
 			for(int j = 0; j < BOARD_ROWS; j++){
-				gameTiles[i][j].draw(batch);
+				gameTiles[i][j].draw(batch,alpha);
 			}
 		}
 	}

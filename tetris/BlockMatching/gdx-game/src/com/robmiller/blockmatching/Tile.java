@@ -1,23 +1,29 @@
 package com.robmiller.blockmatching;
 import com.badlogic.gdx.graphics.g2d.*;
 import android.speech.tts.*;
+import com.badlogic.gdx.scenes.scene2d.*;
 
-public class Tile
+public class Tile extends Actor
 {
-	Point topLeft;
+	Point bottomLeft;
 	private Utils.Colors color;
-	Board myBoard;
 	private Sprite tileSprite;
 	
-	public Tile(Board board, Point pos, Utils.Colors col){
-		topLeft = pos;
+	public Tile() {
+		color = Utils.Colors.NULL;
+		tileSprite = color.getSprite();
+	}
+	
+	public Tile(Point pos, Utils.Colors col){
+		bottomLeft = pos;
 		color = col;
-		myBoard = board;
 		tileSprite = col.getSprite();
 	}
 	
-	public void draw(SpriteBatch batch){
-		tileSprite.setPosition(topLeft.X, topLeft.Y - tileSprite.getHeight());
+	@Override
+	public void draw(Batch batch, float alpha){
+		tileSprite.setPosition(bottomLeft.X, bottomLeft.Y);
+		tileSprite.setSize(Utils.getTileSize(), Utils.getTileSize());
 		tileSprite.draw(batch);
 	}
 	
@@ -26,7 +32,7 @@ public class Tile
 		tileSprite = color.getSprite();
 	}
 	
-	public Utils.Colors getColor(){
+	public Utils.Colors getTileColor(){
 		return color;
 	}
 	

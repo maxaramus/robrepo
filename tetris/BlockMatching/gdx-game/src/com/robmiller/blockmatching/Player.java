@@ -1,34 +1,23 @@
 package com.robmiller.blockmatching;
 import com.badlogic.gdx.graphics.g2d.*;
 import android.graphics.*;
+import com.badlogic.gdx.*;
 
-public class Player
+public class Player implements InputProcessor
 {
 	private final int DRAG_THRESHOLD = 72;
 	private Board board;
-	private float updateTime;
-	private float timeSinceLastUpdate = 0;
 	private boolean wasDragged = false;
 	private boolean isDown = false;
 	private Point lastTouch;
 	private int linesCleared = 0;
 	
-	public Player(){
-		board = new Board(Utils.getTopLeft(),this);
-		updateTime = 0.5f;
-	}
-	
-	public void draw(SpriteBatch batch){
-		board.draw(batch);
+	public Player(Board b){
+		//board = new Board(Utils.getTopLeft(),this);
+		board = b;
 	}
 	
 	public void update(float deltaTime){
-		timeSinceLastUpdate += deltaTime;
-		
-		if(timeSinceLastUpdate >= updateTime){
-			board.update();
-			timeSinceLastUpdate = 0;
-		}
 	}
 	
 	public void holdPressed(){
@@ -39,37 +28,80 @@ public class Player
 		linesCleared += n;
 	}
 	
-	public void touchDown(int x, int y, int pointer, int button)
+	@Override
+	public boolean keyDown(int p1)
+	{
+		// TODO: Implement this method
+		return false;
+	}
+
+	@Override
+	public boolean keyUp(int p1)
+	{
+		// TODO: Implement this method
+		return false;
+	}
+
+	@Override
+	public boolean keyTyped(char p1)
+	{
+		// TODO: Implement this method
+		return false;
+	}
+
+	@Override
+	public boolean touchDown(int x, int y, int pointer, int button)
 	{
 		isDown = true;
 		lastTouch = new Point(x,y);
+		return true;
 	}
 
-	public void touchUp(int x, int y, int pointer, int button)
+	@Override
+	public boolean touchUp(int x, int y, int pointer, int button)
 	{
 		if (isDown && !wasDragged)
 			board.rotatePiece();
-			
+
 		isDown = false;
 		wasDragged = false;
+		return false;
 	}
 
-	public void touchDragged(int x, int y, int pointer)
+	@Override
+	public boolean touchDragged(int x, int y, int pointer)
 	{
+		if (lastTouch == null) return false;
+		
 		if (Math.abs(x - lastTouch.X) > DRAG_THRESHOLD){
 			if (x > lastTouch.X)
 				board.pushRight();
 			else
 				board.pushLeft();
-			
+
 			lastTouch = new Point(x,y);
 			wasDragged = true;
 		}
-		
+
 		if (y - lastTouch.Y > DRAG_THRESHOLD){
 			board.pushDown();
 			lastTouch = new Point(x,y);
 			wasDragged = true;
 		}
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int p1, int p2)
+	{
+		// TODO: Implement this method
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(int p1)
+	{
+		// TODO: Implement this method
+		return false;
 	}
 }

@@ -10,6 +10,7 @@ public class Piece
 	protected Utils.Colors color = null;
 	protected Board gameBoard;
 	public boolean isLocked = false;
+	
 	public Piece(Board gb, Point loc, Utils.Colors col) {
 		location = loc;
 		gameBoard = gb;
@@ -18,7 +19,7 @@ public class Piece
 	
 	public void pushDown(){
 		clearPiece();
-		Point newLoc = new Point(location.X,location.Y + 1);
+		Point newLoc = new Point(location.X,location.Y - 1);
 		isLocked = !validMove(newLoc);
 		
 		if(!isLocked){
@@ -132,7 +133,7 @@ public class Piece
 		return valid;
 	}
 	
-	protected void clearPiece(){
+	public void clearPiece(){
 		if (isLocked) return;
 		
 		Point[] tiles = offsets.get(getRotation());
